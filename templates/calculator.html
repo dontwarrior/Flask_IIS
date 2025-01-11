@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <div class="content-section">
+        <h1>Словом Калкулатор</h1>
+        <form method="POST" action="">
+            <fieldset class="form-group">
+                <div class="form-group">
+                    {{ form.amount.label(class="form-control-label") }}
+                    {{ form.amount(class="form-control") }}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
