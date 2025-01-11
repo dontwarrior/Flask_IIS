@@ -1,3 +1,4 @@
+
 one = ["", "един ", "два ", "три ", "четири ",
        "пет ", "шест ", "седем ", "осем ",
        "девет ", "десет ", "единадесет ", "дванадесет ",
@@ -62,7 +63,6 @@ def conv_single_thousand(n):
     # places (if any)
     out += num_to_words((n % 100), "")
 
-    # format string lingua
 
     n_str = str(n)
     n_len = len(n_str)
@@ -376,9 +376,7 @@ def conv_thousands(n):
 
         if n_str[-4] == "1" or n_str[-4] == "2":
             if n_str[-4] == "1":
-                for i in range(len(slovom_list)):
-                    if slovom_list[i] == 'един':
-                        slovom_list[i] = 'една'
+                pass
 
             if n_str[-4] == "2":
                 for i in range(len(slovom_list)):
@@ -445,10 +443,16 @@ def conv_thousands(n):
                     if slovom_list[i] == 'един':
                         slovom_list[i] = 'една'
 
+            if n_str[-1] == "1" and hundreds_str != 000:
+                slovom_list[-1] = 'един'
+
             if n_str[-4] == "2":
                 for i in range(len(slovom_list)):
                     if slovom_list[i] == 'два':
                         slovom_list[i] = 'две'
+
+            if n_str[-1] == "2" and hundreds_str != 000:
+                slovom_list[-1] = 'два'
 
             slovom_str = " ".join(slovom_list)
 
@@ -498,10 +502,6 @@ def conv_millions(n):
                     slovom_str = one[millions_n] + "милионa и " + conv_thousands(
                         int(hundred_thousands_str + hundreds_str))
 
-        if hundreds_str == "000":
-            slovom_list=slovom_str.split()
-            slovom_list.pop(2)
-            slovom_str = " ".join(slovom_list)
 
     if 7 < nlen < 10:
         milions_list = n_list[:-6]
@@ -510,14 +510,43 @@ def conv_millions(n):
         milions_digits_str = "".join(milions_digits_list)
         milions_words = conv_hundred(int(milions_str))
         milions_digits_words = conv_thousands(int(milions_digits_str))
-        hundreds_str = milions_digits_str[2:]
+        hundreds_str = milions_digits_str[3:]
+        hundred_thousands_str = milions_digits_str[:3]
 
         slovom_str = milions_words + " милиона " + milions_digits_words
 
+        if hundreds_str == "000" and hundred_thousands_str == "000":
+            slovom_str = milions_words + " милиона " + milions_digits_words
+
+        if int(hundreds_str) <= 20 and nlen > 7:
+            slovom_str = milions_words + " милиона " + milions_digits_words
+        if int(hundreds_str) % 10 == 0 and int(hundreds_str) != 10 and int(hundreds_str) != 20 and int(
+                hundred_thousands_str) == 0:
+            slovom_str = milions_words + " милиона  " + milions_digits_words
+        if hundreds_str != "000" and hundred_thousands_str == "000":
+            slovom_str = milions_words + " милиона " + milions_digits_words
+
+        if int(hundreds_str) < 101 and hundreds_str[0] == "0" and hundred_thousands_str == "000":
+            slovom_str = milions_words + " милиона и " + milions_digits_words
+
+        if int(hundreds_str) % 100 == 0 and int(hundred_thousands_str) == 0:
+            slovom_str = milions_words + " милиона и " + milions_digits_words
+        if int(hundred_thousands_str) % 100 == 0 and int(hundreds_str) == 0:
+            slovom_str = milions_words + " милиона и " + milions_digits_words
+        if (int(milions_str) > 0 and hundred_thousands_str[0] == "0"
+                and hundred_thousands_str[1] != "0" and hundreds_str == "000"):
+            slovom_str = milions_words + " милиона и " + milions_digits_words
+        if (int(milions_str) > 0 and hundred_thousands_str[0] == "0"
+                and hundred_thousands_str[1] == "0" and hundred_thousands_str[2] != "0" and hundreds_str == "000"):
+            slovom_str = milions_words + " милиона и " + milions_digits_words
+        if (int(milions_str)) > 0 and hundred_thousands_str == "000" and hundreds_str == "000":
+            slovom_str = milions_words + " милиона " + milions_digits_words
     return slovom_str
 
 
 def converter(n):
+    n_str = str(n)
+
     if n < 1000000:
         return conv_thousands(n)
     else:
@@ -539,5 +568,123 @@ def cents_convert(n):
     return cents_words
 
 
-for n in range(922322998, 922424230):
-    print(converter(n))
+def input_split(n):
+
+    if n.isdigit():
+        integers = int(n)
+        if integers > 1000000000:
+            return "Числото e твърде голямо"
+
+        whole_numbers = converter(integers)
+
+        if integers < 2:
+
+            if integers == 0:
+               return "Нула"           
+            if integers == 1:
+                return whole_numbers + " лев"
+        else:
+            return whole_numbers + " лева"
+    else:
+        n_list = [*n]
+        for symbol in n_list:
+            digit_list = []
+            dot_list = []
+            if symbol.isdigit():
+                digit_list.append(symbol)
+            if symbol == "," or symbol == ".":
+                dot_list.append(symbol)
+                if len(dot_list) > 1:
+                    return "Ползвайте една точка или запетая"
+                if "." in n_list:
+                    for i in n:
+                        if i == ".":
+                            n_list = n.split(".")
+                    if len(n_list) < 2:
+                        integers = int(n.replace(".", ""))
+                        decimals = 0
+                    else:
+                        integers_trunkated = "0" + n_list[0]
+                        integers = int(integers_trunkated)
+                        if integers > 1000000000:
+                            return "Числото е твърде голямо"
+                        decimal_truncated = str(n_list[1])
+                        if len(decimal_truncated) > 2:
+                            return "Ползвайте до две цифри след точка или запетая"
+                        if len(decimal_truncated) == 1:
+                            decimal_truncated = decimal_truncated + "0"
+                        if len(decimal_truncated) == 0:
+                            return "Ползвайте до две цифри след точка или запетая"
+                        decimal_trunk = decimal_truncated[:2]
+                        decimals = int(decimal_trunk)
+                        whole_numbers = converter(integers)
+                        decimal_numbers = cents_convert(decimals)
+                        if decimals == 0:
+                            if integers < 2:
+                                return whole_numbers + " лев"
+                            else:
+                                return whole_numbers + " лева"
+                        else:
+                            if integers < 2 and decimals > 1:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинки "
+                                else:
+                                    return whole_numbers + " лев и " + decimal_numbers + " стотинки "
+                            elif decimals < 2 and integers > 1:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинка "
+                                else:
+                                    return whole_numbers + " лева и " + decimal_numbers + " стотинка "
+                            elif integers < 2 and decimals < 2:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинка "
+                                else:
+                                    return whole_numbers + " лев и " + decimal_numbers + " стотинка "
+                            elif integers >= 2 and decimals >= 2:
+                                return whole_numbers + " лева и " + decimal_numbers + " стотинки "
+
+                if "," in n_list:
+                    for i in n:
+                        if i == ",":
+                            n_list = n.split(",")
+                    if len(n_list) < 2:
+                        integers = int(n.replace(",", ""))
+                        decimals = 0
+                    else:
+                        integers_trunkated = "0" + n_list[0]
+                        integers = int(integers_trunkated)
+                        decimal_truncated = str(n_list[1])
+                        if len(decimal_truncated) > 2:
+                            return "Ползвайте до две цифри след точка или запетая"
+                        if len(decimal_truncated) == 1:
+                            decimal_truncated = decimal_truncated + "0"
+                        decimal_trunk = decimal_truncated[:2]
+                        decimals = int(decimal_trunk)
+                        whole_numbers = converter(integers)
+                        decimal_numbers = cents_convert(decimals)
+                        if decimals == 0:
+                            if integers < 2:
+                                return whole_numbers + " лев"
+                            else:
+                                return whole_numbers + " лева"
+                        else:
+                            if integers < 2 and decimals > 1:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинки "
+                                else:
+                                    return whole_numbers + " лев и " + decimal_numbers + " стотинки "
+                            elif decimals < 2 and integers > 1:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинка "
+                                else:
+                                    return whole_numbers + " лева и " + decimal_numbers + " стотинка "
+                            elif integers < 2 and decimals < 2:
+                                if integers == 0:
+                                    return decimal_numbers + " стотинка "
+                                else:
+                                    return whole_numbers + " лев и " + decimal_numbers + " стотинка "
+                            elif integers >= 2 and decimals >= 2:
+                                return whole_numbers + " лева и " + decimal_numbers + " стотинки "
+            elif not symbol.isdigit():
+                return "Попълнете цяло число или дробно число до две цифри след точката или запетаята"
+

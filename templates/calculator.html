@@ -15,4 +15,12 @@
             </div>
         </form>
     </div>
+    <div>
+        {% if amount %}
+          <h1> Резултат </h1>
+            {% print(amount) %}
+        {% else %}
+        {% endif %}
+
+    </div>
 {% endblock content %}
